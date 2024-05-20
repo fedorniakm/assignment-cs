@@ -72,6 +72,7 @@ class UserControllerTest {
 
         mvc.perform(get(API_USERS + "?from=01-01-1992&to=01-01-1998")
                         .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.data").isArray())
@@ -185,7 +186,8 @@ class UserControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(header().exists("Location"))
                 .andExpect(header().string("Location", API_USERS + "/1"))
-                .andExpect(content().string(""));
+                .andExpect(content().string(""))
+                .andDo(print());
     }
 
     @Test
@@ -284,7 +286,8 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.errors..message", hasItems(
                         "Field [data.email] is not valid.",
                         "Field [data.firstName] is not valid.",
-                        "Field [data.lastName] is not valid.")));
+                        "Field [data.lastName] is not valid.")))
+                .andDo(print());
     }
 
     @Test
@@ -323,7 +326,8 @@ class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(updateUserJson))
                 .andExpect(status().isOk())
-                .andExpect(content().string(""));
+                .andExpect(content().string(""))
+                .andDo(print());
     }
 
     @Test

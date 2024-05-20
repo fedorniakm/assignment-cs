@@ -2,7 +2,6 @@ package com.fedorniakm.assignment.controller;
 
 import com.fedorniakm.assignment.model.Errors;
 import org.springframework.http.*;
-import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
