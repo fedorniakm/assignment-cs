@@ -35,7 +35,7 @@ public class UserControllerAdvice {
     public ResponseEntity<Errors> handleMethodArgumentTypeMismatchException(
             MethodArgumentTypeMismatchException e) {
         var errors = new Errors();
-        errors.addError(400,
+        errors.addError(HttpStatus.BAD_REQUEST.value(),
                 "Param [" + e.getName() + "] is not valid",
                 "Param is expected to be " + e.getRequiredType().getSimpleName());
         return ResponseEntity.badRequest().body(errors);
@@ -44,8 +44,17 @@ public class UserControllerAdvice {
     @ExceptionHandler({DateTimeParseException.class})
     public ResponseEntity<Errors> handleHttpMessageNotReadableException(DateTimeParseException e) {
         var errors = new Errors();
-        errors.addError(400,
+        errors.addError(HttpStatus.BAD_REQUEST.value(),
                 "Input date [" + e.getParsedString() + "] is not valid or has a wrong format.",
+                e.getMessage());
+        return ResponseEntity.badRequest().body(errors);
+    }
+
+    @ExceptionHandler({NullPointerException.class})
+    public ResponseEntity<Errors> handleNullPointerException(NullPointerException e) {
+        var errors = new Errors();
+        errors.addError(400,
+                e.getMessage(),
                 e.getMessage());
         return ResponseEntity.badRequest().body(errors);
     }

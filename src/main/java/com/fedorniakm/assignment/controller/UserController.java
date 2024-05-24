@@ -6,6 +6,7 @@ import com.fedorniakm.assignment.model.UserPatch;
 import com.fedorniakm.assignment.model.User;
 import com.fedorniakm.assignment.service.UserService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @RestController
@@ -42,6 +44,10 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<String> createUser(@Valid @RequestBody Data<User> userData) {
+        Objects.requireNonNull(userData,
+                "Incoming user fields must be wrapped the \"data\" field.");
+        Objects.requireNonNull(userData.data(),
+                "Incoming user fields must be wrapped the \"data\" field.");
         var createdUser = userService.create(userData.data());
         var resourceUri = URI.create("/v1/users/" + createdUser.getId());
         return ResponseEntity.created(resourceUri).build();
