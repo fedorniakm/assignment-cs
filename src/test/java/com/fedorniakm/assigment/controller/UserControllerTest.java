@@ -331,7 +331,7 @@ class UserControllerTest {
     }
 
     @Test
-    void putUser_whenUserDoesNotExist_thenReturn200() throws Exception {
+    void putUser_whenUserDoesNotExist_thenReturn404() throws Exception {
         var updateUserJson = userDataJson(null,
                 "email@email.com",
                 "John",

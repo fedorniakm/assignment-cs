@@ -4,13 +4,14 @@ import com.fedorniakm.assignment.AssignmentApplication;
 import com.fedorniakm.assignment.model.Data;
 import com.fedorniakm.assignment.model.User;
 import com.fedorniakm.assignment.service.UserService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
+import org.springframework.http.*;
+import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.test.annotation.DirtiesContext;
 
 import java.time.LocalDate;
@@ -27,16 +28,21 @@ import static org.junit.jupiter.api.Assertions.*;
 class ApplicationIntegrationTest {
 
     private static final String API_USERS = "/v1/users";
+    private static final String API_USERS_ID = "/v1/users/{id}";
 
     @Autowired
-    private TestRestTemplate restTemplate;
+    private TestRestTemplate restTemplate = new TestRestTemplate();
 
     @Autowired
     private UserService userService;
 
-    @Test
-    void contextLoads() {
+    @BeforeEach
+    void configureFactory() {
+        restTemplate.getRestTemplate().setRequestFactory(new JdkClientHttpRequestFactory());
     }
+
+    @Test
+    void contextLoads() { }
 
     @Test
     void getAllUsers() {
@@ -45,7 +51,7 @@ class ApplicationIntegrationTest {
 
         var response = restTemplate.exchange(API_USERS,
                 HttpMethod.GET,
-                new HttpEntity<>(Map.of("ContentType", "application/json")),
+                new HttpEntity<>(headersWithContentTypeJson()),
                 new ParameterizedTypeReference<Data<List<User>>>() {});
         assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
         assertNotNull(response.getBody());
@@ -57,7 +63,7 @@ class ApplicationIntegrationTest {
     void getAllUsers_WhenNoUsers_ThenEmptyData() {
         var response = restTemplate.exchange(API_USERS,
                 HttpMethod.GET,
-                new HttpEntity<>(Map.of("ContentType", "application/json")),
+                new HttpEntity<>(headersWithContentTypeJson()),
                 new ParameterizedTypeReference<Data<List<User>>>() {});
 
         assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
@@ -81,7 +87,7 @@ class ApplicationIntegrationTest {
 
         var response = restTemplate.exchange(API_USERS + "?from=01-01-1992&to=01-01-1998",
                 HttpMethod.GET,
-                new HttpEntity<>(Map.of("ContentType", "application/json")),
+                new HttpEntity<>(headersWithContentTypeJson()),
                 new ParameterizedTypeReference<Data<List<User>>>() {});
         log("Response: " + response);
 
@@ -103,10 +109,11 @@ class ApplicationIntegrationTest {
         var user = validUser();
         userService.create(user);
 
-        var response = restTemplate.exchange(API_USERS + "/1",
+        var response = restTemplate.exchange(API_USERS_ID,
                 HttpMethod.GET,
-                new HttpEntity<>(Map.of("ContentType", "application/json")),
-                new ParameterizedTypeReference<Data<User>>() {});
+                new HttpEntity<>(headersWithContentTypeJson()),
+                new ParameterizedTypeReference<Data<User>>() {},
+                1);
 
         assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
         assertNotNull(response.getBody());
@@ -134,6 +141,79 @@ class ApplicationIntegrationTest {
 
         assertTrue(savedUser.isPresent());
         assertEqualUsers(user, savedUser.get());
+    }
+
+    @Test
+    void deleteUser() {
+        var user = validUser();
+        var userId = userService.create(user).getId();
+
+        var response = restTemplate.exchange(
+                API_USERS_ID,
+                HttpMethod.DELETE,
+                new HttpEntity<>(headersWithContentTypeJson()),
+                String.class,
+                userId);
+
+        assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
+        assertThat(userService.getById(userId)).isNotPresent();
+    }
+
+    @Test
+    void updateUser() {
+        var user = validUser();
+        var userId = userService.create(user).getId();
+        var userUpdate = new User(null,
+                "test@test.com",
+                "testF",
+                "testL",
+                LocalDate.of(1990, 1, 1),
+                Optional.of("add"),
+                Optional.of("ph++"));
+
+        var response = restTemplate.exchange(
+                API_USERS_ID,
+                HttpMethod.PUT,
+                new HttpEntity<>(Data.of(userUpdate), headersWithContentTypeJson()),
+                String.class,
+                userId);
+
+        log(response);
+        var updatedUser = userService.getById(userId);
+
+        assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
+        assertThat(updatedUser).isPresent();
+        assertEqualUsers(userUpdate, updatedUser.get());
+    }
+
+    @Test
+    void patchUser() {
+        var newUser = validUser();
+        var userId = userService.create(newUser).getId();
+        var userPatch = userDataJson(null,
+                "test@test.com",
+                "testF",
+                "testL",
+                null,
+                null,
+                null);
+
+        var response = restTemplate.exchange(
+                API_USERS_ID,
+                HttpMethod.PATCH,
+                new HttpEntity<>(userPatch, headersWithContentTypeJson()),
+                String.class,
+                userId);
+
+        log(response);
+        var updatedUser = userService.getById(userId);
+
+        assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
+        assertThat(updatedUser).isPresent();
+        var actuallUser = updatedUser.get();
+        assertEquals("test@test.com", actuallUser.getEmail());
+        assertEquals("testF", actuallUser.getFirstName());
+        assertEquals("testL", actuallUser.getLastName());
     }
 
     private void assertEqualUsers(User expected, User actual) {
@@ -191,6 +271,12 @@ class ApplicationIntegrationTest {
             userDataJson.add("\"phoneNumber\":\"" + phoneNumber + "\"");
         }
         return "{\"data\":{" + userDataJson + "}}";
+    }
+
+    private HttpHeaders headersWithContentTypeJson() {
+        var headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return headers;
     }
 
 }
