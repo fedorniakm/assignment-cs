@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.fedorniakm</groupId>
-	<artifactId>assignment</artifactId>
+	<artifactId>demo</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>assignment</name>
-	<description>RESTful API for Users</description>
+	<name>demo</name>
+	<description>Demo RESTful API</description>
 	<properties>
 		<java.version>17</java.version>
 	</properties>

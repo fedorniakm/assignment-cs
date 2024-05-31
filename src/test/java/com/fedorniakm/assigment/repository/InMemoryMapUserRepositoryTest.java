@@ -1,6 +1,6 @@
 package com.fedorniakm.assigment.repository;
 
-import com.fedorniakm.assignment.AssignmentApplication;
+import com.fedorniakm.assignment.Application;
 import com.fedorniakm.assignment.model.User;
 import com.fedorniakm.assignment.model.UserPatch;
 import com.fedorniakm.assignment.repository.UserRepository;
@@ -19,7 +19,7 @@ import java.util.stream.IntStream;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(classes = AssignmentApplication.class)
+@SpringBootTest(classes = Application.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class InMemoryMapUserRepositoryTest {
 

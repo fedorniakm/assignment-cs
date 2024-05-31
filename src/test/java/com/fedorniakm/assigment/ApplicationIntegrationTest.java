@@ -1,6 +1,6 @@
 package com.fedorniakm.assigment;
 
-import com.fedorniakm.assignment.AssignmentApplication;
+import com.fedorniakm.assignment.Application;
 import com.fedorniakm.assignment.model.Data;
 import com.fedorniakm.assignment.model.User;
 import com.fedorniakm.assignment.service.UserService;
@@ -22,7 +22,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(
-        classes = AssignmentApplication.class,
+        classes = Application.class,
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class ApplicationIntegrationTest {

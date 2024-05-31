@@ -1,6 +1,6 @@
 package com.fedorniakm.assigment.controller;
 
-import com.fedorniakm.assignment.AssignmentApplication;
+import com.fedorniakm.assignment.Application;
 import com.fedorniakm.assignment.controller.UserController;
 import com.fedorniakm.assignment.model.User;
 import com.fedorniakm.assignment.service.DefaultUserService;
@@ -30,7 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(UserController.class)
-@ContextConfiguration(classes = AssignmentApplication.class)
+@ContextConfiguration(classes = Application.class)
 class UserControllerTest {
 
     private static final String API_USERS = "/v1/users";
