@@ -1,56 +1,63 @@
-package com.fedorniakm.assignment.service;
+package com.fedorniakm.assignment.repository;
 
 import com.fedorniakm.assignment.model.User;
 import com.fedorniakm.assignment.model.UserPatch;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
-@Service
-public class SimpleUserService implements UserService {
+@Repository
+public class InMemoryMapUserRepository implements UserRepository {
 
-    private final List<User> userRepository;
-    private final AtomicLong idGenerator;
+    private final AtomicLong atomicLong = new AtomicLong(1L);
+    private final Map<Long, User> users;
 
-    public SimpleUserService() {
-        this.userRepository = new ArrayList<>();
-        this.idGenerator = new AtomicLong(1);
+    public InMemoryMapUserRepository() {
+        this.users = new HashMap<>();
     }
 
     @Override
     public List<User> getAll() {
-        return userRepository;
+        return new ArrayList<>(users.values());
     }
 
     @Override
     public List<User> getAll(Optional<LocalDate> from, Optional<LocalDate> to) {
-        var users = userRepository.stream();
+        var userStream = users.values().stream();
         if (from.isPresent()) {
-            users = users.filter(user -> user.getBirthDate().isAfter(from.get()));
+            userStream = userStream.filter(user -> user.getBirthDate().isAfter(from.get()));
         }
         if (to.isPresent()) {
-            users = users.filter(user -> user.getBirthDate().isBefore(to.get()));
+            userStream = userStream.filter(user -> user.getBirthDate().isBefore(to.get()));
         }
-
-        return users.toList();
+        return userStream.toList();
     }
 
     @Override
     public Optional<User> getById(Long id) {
-        return userRepository.stream().filter(user -> user.getId().equals(id)).findAny();
+        return Optional.ofNullable(users.get(id));
     }
 
     @Override
     public User create(User user) {
-        user.setId(idGenerator.getAndIncrement());
-        userRepository.add(user);
+        Objects.requireNonNull(user);
+        var id = atomicLong.getAndIncrement();
+        user.setId(id);
+        users.put(id, user);
         return user;
+    }
+
+    @Override
+    public boolean deleteById(Long id) {
+        return users.remove(id) != null;
+    }
+
+    @Override
+    public boolean replace(User user) {
+        return users.replace(user.getId(), user) != null;
     }
 
     @Override
@@ -61,19 +68,6 @@ public class SimpleUserService implements UserService {
             return true;
         }
         return false;
-    }
-
-    @Override
-    public boolean deleteById(Long id) {
-        return userRepository.removeIf(u -> u.getId().equals(id));
-    }
-
-    @Override
-    public boolean replace(User user) {
-         var isRemoved = userRepository.removeIf(u -> u.getId().equals(user.getId()));
-         if (isRemoved)
-             userRepository.add(user);
-         return isRemoved;
     }
 
     private void patch(User user, UserPatch patch) {

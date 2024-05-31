@@ -3,7 +3,7 @@ package com.fedorniakm.assigment.controller;
 import com.fedorniakm.assignment.AssignmentApplication;
 import com.fedorniakm.assignment.controller.UserController;
 import com.fedorniakm.assignment.model.User;
-import com.fedorniakm.assignment.service.SimpleUserService;
+import com.fedorniakm.assignment.service.DefaultUserService;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -40,11 +40,11 @@ class UserControllerTest {
     private MockMvc mvc;
 
     @MockBean
-    private SimpleUserService simpleUserService;
+    private DefaultUserService defaultUserService;
 
     @Test
     void getAllUsers_whenNoUsers_thenReturnEmptyJson() throws Exception {
-        given(simpleUserService.getAll()).willReturn(Collections.emptyList());
+        given(defaultUserService.getAll()).willReturn(Collections.emptyList());
 
         mvc.perform(get(API_USERS)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -67,7 +67,7 @@ class UserControllerTest {
                 .phoneNumber(Optional.empty())
                 .build();
 
-        given(simpleUserService.getAll(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        given(defaultUserService.getAll(ArgumentMatchers.any(), ArgumentMatchers.any()))
                 .willReturn(List.of(user));
 
         mvc.perform(get(API_USERS + "?from=01-01-1992&to=01-01-1998")
@@ -140,7 +140,7 @@ class UserControllerTest {
                 .phoneNumber(Optional.of("38099"))
                 .build();
 
-        given(simpleUserService.getById(1L)).willReturn(Optional.ofNullable(user));
+        given(defaultUserService.getById(1L)).willReturn(Optional.ofNullable(user));
 
         mvc.perform(get(API_USERS_ID, "1")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -160,7 +160,7 @@ class UserControllerTest {
 
     @Test
     void getUserById_whenUsersNotExist_thenReturnEmptyData() throws Exception {
-        given(simpleUserService.getById(anyLong())).willReturn(Optional.empty());
+        given(defaultUserService.getById(anyLong())).willReturn(Optional.empty());
 
         mvc.perform(get(API_USERS_ID, "1")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -177,7 +177,7 @@ class UserControllerTest {
                 """;
 
         var idCounter = 0L;
-        given(simpleUserService.create(ArgumentMatchers.any(User.class)))
+        given(defaultUserService.create(ArgumentMatchers.any(User.class)))
                 .willReturn(User.builder().id(++idCounter).build());
 
         mvc.perform(post(API_USERS)
@@ -197,7 +197,7 @@ class UserControllerTest {
                 """;
 
         var idCounter = 0L;
-        given(simpleUserService.create(ArgumentMatchers.any(User.class)))
+        given(defaultUserService.create(ArgumentMatchers.any(User.class)))
                 .willReturn(User.builder().id(++idCounter).build());
 
         mvc.perform(post(API_USERS)
@@ -292,7 +292,7 @@ class UserControllerTest {
 
     @Test
     void deleteUser_whenSuccessfullyDeleted_thenReturn200() throws Exception {
-        given(simpleUserService.deleteById(1L)).willReturn(true);
+        given(defaultUserService.deleteById(1L)).willReturn(true);
 
         mvc.perform(delete(API_USERS_ID, 1L)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -302,7 +302,7 @@ class UserControllerTest {
 
     @Test
     void deleteUser_whenNoUser_thenReturn204() throws Exception {
-        given(simpleUserService.deleteById(1L)).willReturn(false);
+        given(defaultUserService.deleteById(1L)).willReturn(false);
 
         mvc.perform(delete(API_USERS_ID, 1L)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -320,7 +320,7 @@ class UserControllerTest {
                 "Address str. Address DC, ADR",
                 "+380927364527");
 
-        given(simpleUserService.replace(ArgumentMatchers.any(User.class))).willReturn(true);
+        given(defaultUserService.replace(ArgumentMatchers.any(User.class))).willReturn(true);
 
         mvc.perform(put(API_USERS_ID, 1L)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -340,7 +340,7 @@ class UserControllerTest {
                 "Address str. Address DC, ADR",
                 "+380927364527");
 
-        given(simpleUserService.replace(ArgumentMatchers.any(User.class))).willReturn(false);
+        given(defaultUserService.replace(ArgumentMatchers.any(User.class))).willReturn(false);
 
         mvc.perform(put(API_USERS_ID, 1L)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -359,7 +359,7 @@ class UserControllerTest {
                 "Address str. Address DC, ADR",
                 "+380927364527");
 
-        given(simpleUserService.replace(ArgumentMatchers.any(User.class))).willReturn(true);
+        given(defaultUserService.replace(ArgumentMatchers.any(User.class))).willReturn(true);
 
         mvc.perform(put(API_USERS_ID, 1L)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -442,7 +442,7 @@ class UserControllerTest {
                 "Address str. Address DC, ADR",
                 "+380927364527");
 
-        given(simpleUserService.patch(anyLong(), ArgumentMatchers.any()))
+        given(defaultUserService.patch(anyLong(), ArgumentMatchers.any()))
                 .willReturn(true);
 
         mvc.perform(patch(API_USERS_ID, 1L)
@@ -462,7 +462,7 @@ class UserControllerTest {
                 "Address str. Address DC, ADR",
                 "+380927364527");
 
-        given(simpleUserService.patch(anyLong(), ArgumentMatchers.any()))
+        given(defaultUserService.patch(anyLong(), ArgumentMatchers.any()))
                 .willReturn(false);
 
         mvc.perform(patch(API_USERS_ID, 1L)
@@ -494,7 +494,7 @@ class UserControllerTest {
                 null,
                 null);
 
-        given(simpleUserService.patch(anyLong(), ArgumentMatchers.any()))
+        given(defaultUserService.patch(anyLong(), ArgumentMatchers.any()))
                 .willReturn(true);
 
         mvc.perform(patch(API_USERS_ID, 1L)
@@ -518,7 +518,7 @@ class UserControllerTest {
                 null,
                 null);
 
-        given(simpleUserService.patch(anyLong(), ArgumentMatchers.any()))
+        given(defaultUserService.patch(anyLong(), ArgumentMatchers.any()))
                 .willReturn(true);
 
         mvc.perform(patch(API_USERS_ID, 1L)
