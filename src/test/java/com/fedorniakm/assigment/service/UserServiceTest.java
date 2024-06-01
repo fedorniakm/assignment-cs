@@ -1,9 +1,9 @@
-package com.fedorniakm.assigment.repository;
+package com.fedorniakm.assigment.service;
 
 import com.fedorniakm.assignment.Application;
 import com.fedorniakm.assignment.model.User;
 import com.fedorniakm.assignment.model.UserPatch;
-import com.fedorniakm.assignment.repository.UserRepository;
+import com.fedorniakm.assignment.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -21,10 +21,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = Application.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-class InMemoryMapUserRepositoryTest {
+class UserServiceTest {
 
     @Autowired
-    private UserRepository userRepo;
+    private UserService userService;
 
     @ParameterizedTest
     @ValueSource(ints = {1, 10, 1000, 10_000})
@@ -32,7 +32,7 @@ class InMemoryMapUserRepositoryTest {
         IntStream.range(0, userNumber)
                 .mapToObj(i -> validUser())
                 .forEach(user -> {
-                    var createdUser = userRepo.create(user);
+                    var createdUser = userService.create(user);
                     assertNotNull(createdUser.getId(),
                             "User Id is not populated while creating.");
                     assertEqualUsers(user, createdUser);
@@ -48,8 +48,8 @@ class InMemoryMapUserRepositoryTest {
                 LocalDate.of(1991, 2, 3),
                 Optional.of("Test Address"),
                 Optional.of("+129873298374"));
-        user = userRepo.create(user);
-        var foundUser = userRepo.getById(user.getId());
+        user = userService.create(user);
+        var foundUser = userService.getById(user.getId());
 
         assertThat(foundUser).isPresent();
         assertEqualUsers(user, foundUser.get());
@@ -57,7 +57,7 @@ class InMemoryMapUserRepositoryTest {
 
     @Test
     void testGetById_NotFound() {
-        var foundUser = userRepo.getById(1L);
+        var foundUser = userService.getById(1L);
 
         assertThat(foundUser).isNotPresent();
     }
@@ -67,16 +67,16 @@ class InMemoryMapUserRepositoryTest {
     void testGetAll(int userNumber) {
         IntStream.range(0, userNumber)
                 .mapToObj(i -> validUser())
-                .forEach(userRepo::create);
+                .forEach(userService::create);
 
-        var users = userRepo.getAll();
+        var users = userService.getAll();
 
         assertThat(users.size()).isEqualTo(userNumber);
     }
 
     @Test
     void testGetAll_NoUsers() {
-        var users = userRepo.getAll();
+        var users = userService.getAll();
 
         assertThat(users).isNotNull();
         assertThat(users.size()).isEqualTo(0);
@@ -85,34 +85,34 @@ class InMemoryMapUserRepositoryTest {
     @Test
     void testDeleteById() {
         var user = validUser();
-        var userId = userRepo.create(user).getId();
+        var userId = userService.create(user).getId();
 
-        var result = userRepo.deleteById(userId);
+        var result = userService.deleteById(userId);
 
         assertThat(result).isTrue();
-        assertThat(userRepo.getById(userId)).isNotPresent();
+        assertThat(userService.getById(userId)).isNotPresent();
     }
 
     @Test
     void testDeleteById_NoUser() {
         var userId = 1L;
 
-        var result = userRepo.deleteById(userId);
+        var result = userService.deleteById(userId);
 
         assertThat(result).isFalse();
-        assertThat(userRepo.getById(userId)).isNotPresent();
+        assertThat(userService.getById(userId)).isNotPresent();
     }
 
     @Test
     void testReplace() {
         var firstUser = validUser();
-        var firstUserId = userRepo.create(firstUser).getId();
+        var firstUserId = userService.create(firstUser).getId();
         var secondUser = validUser();
         secondUser.setId(firstUserId);
 
-        var result = userRepo.replace(secondUser);
+        var result = userService.replace(secondUser);
 
-        var savedUser = userRepo.getById(firstUserId);
+        var savedUser = userService.getById(firstUserId);
         assertThat(result).isTrue();
         assertThat(savedUser).isPresent();
         assertEqualUsers(secondUser, savedUser.get());
@@ -124,8 +124,8 @@ class InMemoryMapUserRepositoryTest {
         var user = validUser();
         user.setId(userId);
 
-        var result = userRepo.replace(user);
-        var savedUser = userRepo.getById(userId);
+        var result = userService.replace(user);
+        var savedUser = userService.getById(userId);
 
         assertThat(result).isFalse();
         assertThat(savedUser).isNotPresent();
@@ -136,8 +136,8 @@ class InMemoryMapUserRepositoryTest {
         var userId = 99999L;
         var userPatch = UserPatch.builder().email("test@test.com").build();
 
-        var result = userRepo.patch(userId, userPatch);
-        var savedUser = userRepo.getById(userId);
+        var result = userService.patch(userId, userPatch);
+        var savedUser = userService.getById(userId);
 
         assertThat(result).isFalse();
         assertThat(savedUser).isNotPresent();
@@ -146,15 +146,15 @@ class InMemoryMapUserRepositoryTest {
     @Test
     void testPatch() {
         var user = validUser();
-        var userId = userRepo.create(user).getId();
+        var userId = userService.create(user).getId();
         var userPatch = UserPatch.builder()
                 .email("testingTestTEEEEST@testyvannya.com")
                 .firstName("SomeRandomFirst1Name")
                 .lastName("RandomNameLastForTestP")
                 .build();
 
-        var result = userRepo.patch(userId, userPatch);
-        var patchedUser = userRepo.getById(userId);
+        var result = userService.patch(userId, userPatch);
+        var patchedUser = userService.getById(userId);
 
         assertThat(result).isTrue();
         assertThat(patchedUser).isPresent();

@@ -1,4 +1,4 @@
-package com.fedorniakm.assignment.repository;
+package com.fedorniakm.assignment.persistance.repository;
 
 import com.fedorniakm.assignment.model.User;
 import com.fedorniakm.assignment.model.UserPatch;
