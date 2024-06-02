@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
 @Service
-public class DefaultUserService implements UserService {
+public class SimpleUserService implements UserService {
 
     private static class InMemoryMapUserRepository {
 

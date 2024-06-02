@@ -1,24 +1,23 @@
-package com.fedorniakm.assignment.persistance.repository;
+package com.fedorniakm.assignment.persistence.repository;
 
-import com.fedorniakm.assignment.model.User;
 import com.fedorniakm.assignment.model.UserPatch;
+import com.fedorniakm.assignment.persistence.entity.UserEntity;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository {
-    List<User> getAll();
+    List<UserEntity> getAll();
 
-    List<User> getAll(Optional<LocalDate> from, Optional<LocalDate> to);
+    List<UserEntity> getAll(Optional<LocalDate> from, Optional<LocalDate> to);
 
-    Optional<User> getById(Long id);
+    Optional<UserEntity> getById(Long id);
 
-    User create(User user);
+    UserEntity create(UserEntity user);
 
     boolean deleteById(Long id);
 
-    boolean replace(User user);
+    boolean update(UserEntity user);
 
-    boolean patch(Long id, UserPatch userPatch);
 }

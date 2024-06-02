@@ -3,13 +3,19 @@ package com.fedorniakm.assigment.service;
 import com.fedorniakm.assignment.Application;
 import com.fedorniakm.assignment.model.User;
 import com.fedorniakm.assignment.model.UserPatch;
+import com.fedorniakm.assignment.service.SimpleUserService;
 import com.fedorniakm.assignment.service.UserService;
+import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration;
+import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -19,12 +25,10 @@ import java.util.stream.IntStream;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(classes = Application.class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+
 class UserServiceTest {
 
-    @Autowired
-    private UserService userService;
+    private SimpleUserService userService = new SimpleUserService();
 
     @ParameterizedTest
     @ValueSource(ints = {1, 10, 1000, 10_000})
