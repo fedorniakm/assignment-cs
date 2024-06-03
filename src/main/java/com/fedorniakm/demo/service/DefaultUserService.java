@@ -4,6 +4,7 @@ import com.fedorniakm.demo.model.User;
 import com.fedorniakm.demo.model.UserPatch;
 import com.fedorniakm.demo.persistence.entity.UserEntity;
 import com.fedorniakm.demo.persistence.repository.UserRepository;
+import com.fedorniakm.demo.service.patcher.UserEntityPatcher;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
@@ -11,9 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 @Service
 @Primary
@@ -22,6 +21,7 @@ import java.util.function.Consumer;
 public class DefaultUserService implements UserService {
 
     private final UserRepository repository;
+    private final UserEntityPatcher userEntityPatcher;
 
     @Override
     public List<User> getAll() {
@@ -55,37 +55,14 @@ public class DefaultUserService implements UserService {
     }
 
     @Override
-    public boolean patch(Long id, UserPatch userPatch) {
-        var userEntity = repository.getById(id);
-        if (userEntity.isPresent()) {
-            var user = userEntity.get();
-            patch(user, userPatch);
-            return repository.update(user);
+    public boolean patch(Long id, UserPatch patch) {
+        var target = repository.getById(id);
+        if (target.isPresent()) {
+            var userEntity = target.get();
+            userEntityPatcher.patch(userEntity, patch);
+            return repository.update(userEntity);
         }
         return false;
-    }
-
-    private void patch(UserEntity user, UserPatch patch) {
-        Objects.requireNonNull(user);
-        Objects.requireNonNull(patch);
-        patchStringIfNotEmpty(patch.getEmail(), user::setEmail);
-        patchStringIfNotEmpty(patch.getFirstName(), user::setFirstName);
-        patchStringIfNotEmpty(patch.getLastName(), user::setLastName);
-        patchValue(patch.getBirthDate(), user::setBirthDate);
-        patchValue(patch.getAddress(), user::setAddress);
-        patchValue(patch.getPhoneNumber(), user::setPhoneNumber);
-    }
-
-    private void patchStringIfNotEmpty(String value, Consumer<String> patch) {
-        if (Objects.nonNull(value) && !value.isBlank()) {
-            patch.accept(value);
-        }
-    }
-
-    private <T> void patchValue(T value, Consumer<T> patch) {
-        if (Objects.nonNull(value)) {
-            patch.accept(value);
-        }
     }
 
     private User toUser(UserEntity entity) {

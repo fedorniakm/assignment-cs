@@ -2,22 +2,24 @@ package com.fedorniakm.demo.service;
 
 import com.fedorniakm.demo.model.User;
 import com.fedorniakm.demo.model.UserPatch;
+import com.fedorniakm.demo.service.patcher.UserPatcher;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Consumer;
 
 @Service
 public class SimpleUserService implements UserService {
 
     private static class InMemoryMapUserRepository {
 
+        private final UserPatcher userPatcher;
         private final AtomicLong atomicLong = new AtomicLong(1L);
         private final Map<Long, User> users;
 
-        public InMemoryMapUserRepository() {
+        public InMemoryMapUserRepository(UserPatcher userPatcher) {
+            this.userPatcher = userPatcher;
             this.users = new HashMap<>();
         }
 
@@ -59,37 +61,18 @@ public class SimpleUserService implements UserService {
         public boolean patch(Long id, UserPatch userPatch) {
             var user = getById(id);
             if (user.isPresent()) {
-                patch(user.get(), userPatch);
+                userPatcher.patch(user.get(), userPatch);
                 return true;
             }
             return false;
         }
-
-        private void patch(User user, UserPatch patch) {
-            Objects.requireNonNull(user);
-            Objects.requireNonNull(patch);
-            patchStringIfNotEmpty(patch.getEmail(), user::setEmail);
-            patchStringIfNotEmpty(patch.getFirstName(), user::setFirstName);
-            patchStringIfNotEmpty(patch.getLastName(), user::setLastName);
-            patchValue(patch.getBirthDate(), user::setBirthDate);
-            patchValue(patch.getAddress(), v -> user.setAddress(Optional.of(v)));
-            patchValue(patch.getPhoneNumber(), v -> user.setPhoneNumber((Optional.of(v))));
-        }
-
-        private void patchStringIfNotEmpty(String value, Consumer<String> patch) {
-            if (Objects.nonNull(value) && !value.isBlank()) {
-                patch.accept(value);
-            }
-        }
-
-        private <T> void patchValue(T value, Consumer<T> patch) {
-            if (Objects.nonNull(value)) {
-                patch.accept(value);
-            }
-        }
     }
 
-    private final InMemoryMapUserRepository userRepository = new InMemoryMapUserRepository();
+    private final InMemoryMapUserRepository userRepository;
+
+    public SimpleUserService(UserPatcher userPatcher) {
+        this.userRepository = new InMemoryMapUserRepository(userPatcher);
+    }
 
     @Override
     public List<User> getAll() {
