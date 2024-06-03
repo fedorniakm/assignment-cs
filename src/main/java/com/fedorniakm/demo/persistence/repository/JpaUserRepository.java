@@ -13,7 +13,6 @@ import java.util.Optional;
 
 @Repository
 @Transactional
-@Log4j2
 public class JpaUserRepository implements UserRepository {
 
     private final EntityManager em;

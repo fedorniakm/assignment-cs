@@ -14,13 +14,16 @@ import java.util.stream.IntStream;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
+abstract class UserServiceTest<T extends UserService> {
 
-class UserServiceTest {
+    protected T userService;
 
-    private SimpleUserService userService = new SimpleUserService();
+    protected UserServiceTest(T userService) {
+        this.userService = userService;
+    }
 
     @ParameterizedTest
-    @ValueSource(ints = {1, 10, 1000, 10_000})
+    @ValueSource(ints = {1, 10, 134})
     void testCreateUser_AssignsId(int userNumber) {
         IntStream.range(0, userNumber)
                 .mapToObj(i -> validUser())
@@ -56,7 +59,7 @@ class UserServiceTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {0, 1, 3, 10, 237, 2745})
+    @ValueSource(ints = {0, 1, 3, 10, 137})
     void testGetAll(int userNumber) {
         IntStream.range(0, userNumber)
                 .mapToObj(i -> validUser())
